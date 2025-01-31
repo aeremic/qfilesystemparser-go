@@ -13,7 +13,7 @@ import (
 func readRequiredInputData() (string, int, int) {
 	// reader := bufio.NewReader(os.Stdin)
 
-	fmt.Println("----------------------------------------------------------------")
+	fmt.Println("------------------------------------------------------------")
 
 	fmt.Print("Enter files path for parsing: ")
 	// filespath := extensions.ReadInputAsString(reader)
@@ -30,7 +30,7 @@ func readRequiredInputData() (string, int, int) {
 	maximumNumberOfProcessingJobs := 1
 	fmt.Println("Maximum number of processing jobs: ", maximumNumberOfProcessingJobs)
 
-	fmt.Println("----------------------------------------------------------------")
+	fmt.Println("------------------------------------------------------------")
 
 	return filespath, checkInterval, maximumNumberOfProcessingJobs
 }
