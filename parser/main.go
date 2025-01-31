@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
+	"sync"
 )
+
+var waitGroup sync.WaitGroup
 
 func readRequiredInputData() (string, int, int) {
 	// reader := bufio.NewReader(os.Stdin)
@@ -35,11 +37,17 @@ func readRequiredInputData() (string, int, int) {
 	return filespath, checkInterval, maximumNumberOfProcessingJobs
 }
 
-func main() {
-	filesPath, _, _ := readRequiredInputData()
+func walkDirectory(filesPath string) {
+	defer waitGroup.Done()
 
-	fileSystem := os.DirFS(filesPath)
-	fs.WalkDir(fileSystem, ".", func(path string, directory fs.DirEntry, error error) error {
+	visit := func(path string, fileInfo os.FileInfo, error error) error {
+		if fileInfo.IsDir() {
+			waitGroup.Add(1)
+			go walkDirectory(path)
+
+			return filepath.SkipDir
+		}
+
 		if filepath.Ext(path) == ".json" {
 			jsonFile, error := os.Open(filesPath + "/" + path)
 			if error != nil {
@@ -60,11 +68,22 @@ func main() {
 				fmt.Println("Error on parsing json file: ", path,
 					" Error details: ", errorOnJsonParsing)
 			}
+
 			defer jsonFile.Close()
 
 			fmt.Println("Number of components in ", path, " file: ", len(quest.Components))
 		}
 
 		return nil
-	})
+	}
+
+	filepath.Walk(filesPath, visit)
+}
+
+func main() {
+	filesPath, _, _ := readRequiredInputData()
+
+	waitGroup.Add(1)
+	walkDirectory(filesPath)
+	waitGroup.Wait()
 }
