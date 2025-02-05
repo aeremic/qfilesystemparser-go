@@ -12,6 +12,7 @@ import (
 
 var waitGroup sync.WaitGroup
 
+// Reads data required for input.
 func readRequiredInputData() (string, int, int) {
 	// reader := bufio.NewReader(os.Stdin)
 
@@ -37,41 +38,46 @@ func readRequiredInputData() (string, int, int) {
 	return filespath, checkInterval, maximumNumberOfProcessingJobs
 }
 
+func parseJsonFile(path string) {
+	jsonFile, error := os.Open(path)
+	if error != nil {
+		fmt.Println("Error on opening json file at path: ", path,
+			" Error details: ", error)
+	}
+
+	byteArray, error := io.ReadAll(jsonFile)
+	if error != nil {
+		fmt.Println("Error on reading json file: ", path,
+			" Error details: ", error)
+	}
+
+	var quest common.Quest
+
+	var errorOnJsonParsing = json.Unmarshal(byteArray, &quest)
+	if errorOnJsonParsing != nil {
+		fmt.Println("Error on parsing json file: ", path,
+			" Error details: ", errorOnJsonParsing)
+	}
+	defer jsonFile.Close()
+
+	fmt.Println("Number of components in ", path, " file: ", len(quest.Components))
+}
+
 func walkDirectory(filesPath string) {
 	defer waitGroup.Done()
 
 	visit := func(path string, fileInfo os.FileInfo, error error) error {
-		if fileInfo.IsDir() {
+		if fileInfo.IsDir() && path != filesPath {
 			waitGroup.Add(1)
 			go walkDirectory(path)
 
 			return filepath.SkipDir
 		}
 
-		if filepath.Ext(path) == ".json" {
-			jsonFile, error := os.Open(filesPath + "/" + path)
-			if error != nil {
-				fmt.Println("Error on opening json file at path: ", path,
-					" Error details: ", error)
+		if fileInfo.Mode().IsRegular() {
+			if filepath.Ext(path) == ".json" {
+				parseJsonFile(path)
 			}
-
-			byteArray, error := io.ReadAll(jsonFile)
-			if error != nil {
-				fmt.Println("Error on reading json file: ", path,
-					" Error details: ", error)
-			}
-
-			var quest common.Quest
-
-			var errorOnJsonParsing = json.Unmarshal(byteArray, &quest)
-			if errorOnJsonParsing != nil {
-				fmt.Println("Error on parsing json file: ", path,
-					" Error details: ", errorOnJsonParsing)
-			}
-
-			defer jsonFile.Close()
-
-			fmt.Println("Number of components in ", path, " file: ", len(quest.Components))
 		}
 
 		return nil
