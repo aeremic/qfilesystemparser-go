@@ -36,6 +36,7 @@ func (wgw *WaitGroupWrapper) GetCount() int {
 }
 
 var waitGroup sync.WaitGroup
+var mutex sync.Mutex
 
 // Reads data required for input.
 func readRequiredInputData() (string, int, int, int) {
@@ -102,11 +103,13 @@ func walkDirectory(waitGroupWrapper *WaitGroupWrapper,
 		if fileInfo.IsDir() && path != filesPath {
 			waitGroupWrapper.Add(1)
 
+			mutex.Lock()
 			if int64(waitGroupWrapper.GetCount()) < int64(maximumNumberOfProcessingJob) {
 				go walkDirectory(waitGroupWrapper, maximumNumberOfProcessingJob, path)
 			} else {
 				walkDirectory(waitGroupWrapper, maximumNumberOfProcessingJob, path)
 			}
+			mutex.Unlock()
 
 			return filepath.SkipDir
 		}
