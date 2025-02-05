@@ -102,7 +102,7 @@ func walkDirectory(waitGroupWrapper *WaitGroupWrapper,
 		if fileInfo.IsDir() && path != filesPath {
 			waitGroupWrapper.Add(1)
 
-			if waitGroupWrapper.count < int64(maximumNumberOfProcessingJob) {
+			if int64(waitGroupWrapper.GetCount()) < int64(maximumNumberOfProcessingJob) {
 				go walkDirectory(waitGroupWrapper, maximumNumberOfProcessingJob, path)
 			} else {
 				walkDirectory(waitGroupWrapper, maximumNumberOfProcessingJob, path)
@@ -124,7 +124,8 @@ func walkDirectory(waitGroupWrapper *WaitGroupWrapper,
 }
 
 func main() {
-	filesPath, maximumNumberOfProcessingJob, checkInterval, maximumExecutedCount := readRequiredInputData()
+	filesPath, maximumNumberOfProcessingJob,
+		checkInterval, maximumExecutedCount := readRequiredInputData()
 
 	executedCounter := 0
 	for executedCounter < maximumExecutedCount {
