@@ -59,7 +59,7 @@ func readRequiredInputData() (string, int, int, int) {
 	fmt.Println("Maximum number of processing jobs: ", maximumNumberOfProcessingJobs)
 
 	fmt.Print("Enter maximum number of executions: ")
-	// maximumNumberOfProcessingJobs := extensions.ReadInputAsInt(reader)
+	// maximumExecutedCount := extensions.ReadInputAsInt(reader)
 	maximumExecutedCount := 3
 	fmt.Println("Maximum number of executions: ", maximumExecutedCount)
 
