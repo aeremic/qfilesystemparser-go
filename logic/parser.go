@@ -1,7 +1,6 @@
-package main
+package logic
 
 import (
-	"aeremic/qfilesystemparser/common"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -31,42 +30,56 @@ func (wgw *WaitGroupWrapper) Wait() {
 	wgw.WaitGroup.Wait()
 }
 
-func (wgw *WaitGroupWrapper) GetCount() int {
+func (wgw *WaitGroupWrapper) Count() int {
 	return int(atomic.LoadInt64(&wgw.count))
 }
 
 var waitGroup sync.WaitGroup
 var mutex sync.Mutex
 
-// Reads data required for input.
-func readRequiredInputData() (string, int, int, int) {
-	// reader := bufio.NewReader(os.Stdin)
+type Parser int
 
-	fmt.Println("------------------------------------------------------------")
+var FilesPath string
+var MaximumNumberOfProcessingJobs int
+var CheckInterval int
+var MaximumExecutedCount int
 
-	fmt.Print("Enter files path for parsing: ")
-	// filespath := extensions.ReadInputAsString(reader)
-	filespath := "/Users/eremic/qfilesystemparser-go/Files"
-	fmt.Println("Files path: ", filespath)
+type InputDataArgs struct {
+	FilesPath                     string
+	MaximumNumberOfProcessingJobs int
+	CheckInterval                 int
+	MaximumExecutedCount          int
+}
 
-	fmt.Print("Enter check interval: ")
-	// checkInterval := extensions.ReadInputAsInt(reader)
-	checkInterval := 5
-	fmt.Println("Check interval: ", checkInterval)
+type ParsingArgs struct{}
 
-	fmt.Print("Enter maximum number of processing jobs: ")
-	// maximumNumberOfProcessingJobs := extensions.ReadInputAsInt(reader)
-	maximumNumberOfProcessingJobs := 1
-	fmt.Println("Maximum number of processing jobs: ", maximumNumberOfProcessingJobs)
+func (t *Parser) SetInputDataViaRpc(args *InputDataArgs, reply *int) error {
+	FilesPath = args.FilesPath
+	MaximumNumberOfProcessingJobs = args.MaximumNumberOfProcessingJobs
+	CheckInterval = args.CheckInterval
+	MaximumExecutedCount = args.MaximumExecutedCount
 
-	fmt.Print("Enter maximum number of executions: ")
-	// maximumExecutedCount := extensions.ReadInputAsInt(reader)
-	maximumExecutedCount := 3
-	fmt.Println("Maximum number of executions: ", maximumExecutedCount)
+	*reply = args.MaximumNumberOfProcessingJobs + args.MaximumExecutedCount
 
-	fmt.Println("------------------------------------------------------------")
+	return nil
+}
 
-	return filespath, checkInterval, maximumNumberOfProcessingJobs, maximumExecutedCount
+func (t *Parser) DoParsing(args *ParsingArgs, reply *int) error {
+	executedCounter := 0
+	for executedCounter < MaximumExecutedCount {
+		waitGroupWrapper := WaitGroupWrapper{&waitGroup, int64(0)}
+		waitGroupWrapper.Add(1)
+		walkDirectory(&waitGroupWrapper, MaximumNumberOfProcessingJobs, FilesPath)
+		waitGroupWrapper.Wait()
+
+		time.Sleep(time.Duration(CheckInterval) * time.Second)
+
+		executedCounter++
+	}
+
+	*reply = 1
+
+	return nil
 }
 
 func parseJsonFile(path string) {
@@ -84,7 +97,7 @@ func parseJsonFile(path string) {
 			" Error details: ", error)
 	}
 
-	var quest common.Quest
+	var quest Quest
 
 	var errorOnJsonParsing = json.Unmarshal(byteArray, &quest)
 	if errorOnJsonParsing != nil {
@@ -104,7 +117,7 @@ func walkDirectory(waitGroupWrapper *WaitGroupWrapper,
 			waitGroupWrapper.Add(1)
 
 			mutex.Lock()
-			if int64(waitGroupWrapper.GetCount()) < int64(maximumNumberOfProcessingJob) {
+			if int64(waitGroupWrapper.Count()) < int64(maximumNumberOfProcessingJob) {
 				go walkDirectory(waitGroupWrapper, maximumNumberOfProcessingJob, path)
 			} else {
 				walkDirectory(waitGroupWrapper, maximumNumberOfProcessingJob, path)
@@ -124,21 +137,4 @@ func walkDirectory(waitGroupWrapper *WaitGroupWrapper,
 	}
 
 	filepath.Walk(filesPath, visit)
-}
-
-func main() {
-	filesPath, maximumNumberOfProcessingJob,
-		checkInterval, maximumExecutedCount := readRequiredInputData()
-
-	executedCounter := 0
-	for executedCounter < maximumExecutedCount {
-		waitGroupWrapper := WaitGroupWrapper{&waitGroup, int64(0)}
-		waitGroupWrapper.Add(1)
-		walkDirectory(&waitGroupWrapper, maximumNumberOfProcessingJob, filesPath)
-		waitGroupWrapper.Wait()
-
-		time.Sleep(time.Duration(checkInterval) * time.Second)
-
-		executedCounter++
-	}
 }

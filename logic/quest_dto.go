@@ -1,4 +1,4 @@
-package common
+package logic
 
 type Quest struct {
 	Components []Component `json:"components"`
