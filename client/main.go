@@ -61,7 +61,7 @@ func main() {
 	fmt.Println("Reply: ", reply)
 
 	parsingArgs := &logic.ParsingArgs{}
-	if client.Call("Parser.DoParsing", parsingArgs, &reply); error != nil {
+	if client.Call("Parser.DoParsingViaRpc", parsingArgs, &reply); error != nil {
 		log.Fatal("Error on client call: ", error)
 	}
 
