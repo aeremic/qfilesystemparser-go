@@ -40,6 +40,8 @@ func (t *Parser) SetInputData(args *InputDataArgs, reply *MethodCallResult) erro
 var quitChannel = make(chan bool)
 
 func (t *Parser) DoParsing(args *ParsingArgs, reply *MethodCallResult) error {
+	errorChannel := make(chan error)
+
 	go func() {
 		executedCounter := 0
 		for executedCounter < MaximumExecutedCount {
@@ -58,11 +60,12 @@ func (t *Parser) DoParsing(args *ParsingArgs, reply *MethodCallResult) error {
 				executedCounter++
 			}
 		}
+
+		*reply = MethodCallResult{true, nil}
+		errorChannel <- nil
 	}()
 
-	*reply = MethodCallResult{true, nil}
-
-	return nil
+	return <-errorChannel
 }
 
 type StopParsingArgs struct{}

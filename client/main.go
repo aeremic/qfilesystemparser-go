@@ -1,20 +1,17 @@
 package main
 
 import (
-	"aeremic/qfilesystemparser/extensions"
 	"aeremic/qfilesystemparser/logic"
-	"bufio"
 	"fmt"
 	"log"
 	"net/rpc"
-	"os"
 )
 
 // Reads data required for input.
 func readRequiredInputData() (string, int, int, int) {
 	// reader := bufio.NewReader(os.Stdin)
 
-	fmt.Println("------------------------------------------------------------")
+	fmt.Println("------------------------------------------------------")
 
 	fmt.Print("Enter files path for parsing: ")
 	// filespath := extensions.ReadInputAsString(reader)
@@ -36,7 +33,7 @@ func readRequiredInputData() (string, int, int, int) {
 	maximumExecutedCount := 5
 	fmt.Println("Maximum number of executions: ", maximumExecutedCount)
 
-	fmt.Println("------------------------------------------------------------")
+	fmt.Println("------------------------------------------------------")
 
 	return filespath, checkInterval, maximumNumberOfProcessingJobs, maximumExecutedCount
 }
@@ -67,15 +64,20 @@ func main() {
 		log.Fatal("Error on client call: ", error)
 	}
 
-	reader := bufio.NewReader(os.Stdin)
+	// reader := bufio.NewReader(os.Stdin)
+	// fmt.Print("Enter STOP to cancel parsing: ")
+	// stopInput := extensions.ReadInputAsString(reader)
+	// if stopInput == "STOP" {
+	// 	stopParsingArgs := &logic.StopParsingArgs{}
+	// 	stopParsingReply := &logic.MethodCallResult{}
+	// 	if client.Call("Parser.StopParsing", stopParsingArgs, &stopParsingReply); error != nil {
+	// 		log.Fatal("Error on client call: ", error)
+	// 	}
+	// }
 
-	fmt.Print("Enter STOP to cancel parsing: ")
-	stopInput := extensions.ReadInputAsString(reader)
-	if stopInput == "STOP" {
-		stopParsingArgs := &logic.StopParsingArgs{}
-		stopParsingReply := &logic.MethodCallResult{}
-		if client.Call("Parser.StopParsing", stopParsingArgs, &stopParsingReply); error != nil {
-			log.Fatal("Erro on stoping client call: ", error)
-		}
+	if doParsingReply.IsSuccess {
+		fmt.Println("Parsing successfull.")
+	} else {
+		fmt.Println("Parsing failed.")
 	}
 }
