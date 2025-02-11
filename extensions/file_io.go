@@ -25,3 +25,11 @@ func ReadInputAsInt(reader *bufio.Reader) int {
 		return value
 	}
 }
+
+func WriteString(writer *bufio.Writer, output string) {
+	_, writeError :=
+		writer.WriteString(output)
+	if writeError != nil {
+		panic(writeError)
+	}
+}

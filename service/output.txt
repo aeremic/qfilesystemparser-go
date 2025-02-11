@@ -1,0 +1,30 @@
+Number of components in /Users/eremic/qfilesystemparser-go/Files/1.json file: 0
+Number of components in /Users/eremic/qfilesystemparser-go/Files/2.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/3.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/4.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/5.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/6.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/1.json file: 0
+Number of components in /Users/eremic/qfilesystemparser-go/Files/2.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/3.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/4.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/5.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/6.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/1.json file: 0
+Number of components in /Users/eremic/qfilesystemparser-go/Files/2.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/3.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/4.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/5.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/6.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/1.json file: 0
+Number of components in /Users/eremic/qfilesystemparser-go/Files/2.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/3.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/4.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/5.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/6.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/1.json file: 0
+Number of components in /Users/eremic/qfilesystemparser-go/Files/2.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/3.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/4.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/5.json file: 3
+Number of components in /Users/eremic/qfilesystemparser-go/Files/New folder/6.json file: 3

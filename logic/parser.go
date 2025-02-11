@@ -1,7 +1,9 @@
 package logic
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -42,7 +44,14 @@ var quitChannel = make(chan bool)
 func (t *Parser) DoParsing(args *ParsingArgs, reply *MethodCallResult) error {
 	errorChannel := make(chan error)
 
+	file, error := os.Create("output.txt")
+	if error != nil {
+		panic(error)
+	}
+	defer file.Close()
+
 	go func() {
+		writer := bufio.NewWriter(file)
 		executedCounter := 0
 		for executedCounter < MaximumExecutedCount {
 			select {
@@ -52,7 +61,7 @@ func (t *Parser) DoParsing(args *ParsingArgs, reply *MethodCallResult) error {
 			default:
 				waitGroupWrapper := WaitGroupWrapper{&waitGroup, int64(0)}
 				waitGroupWrapper.Add(1)
-				walkDirectory(&waitGroupWrapper, MaximumNumberOfProcessingJobs, FilesPath)
+				walkDirectory(writer, &waitGroupWrapper, MaximumNumberOfProcessingJobs, FilesPath)
 				waitGroupWrapper.Wait()
 
 				time.Sleep(time.Duration(CheckInterval) * time.Second)
@@ -60,6 +69,8 @@ func (t *Parser) DoParsing(args *ParsingArgs, reply *MethodCallResult) error {
 				executedCounter++
 			}
 		}
+
+		writer.Flush()
 
 		*reply = MethodCallResult{true, nil}
 		errorChannel <- nil

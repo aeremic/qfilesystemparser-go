@@ -1,11 +1,14 @@
 package logic
 
 import (
+	"aeremic/qfilesystemparser/extensions"
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"sync/atomic"
 )
@@ -36,7 +39,7 @@ func (wgw *WaitGroupWrapper) Count() int {
 var waitGroup sync.WaitGroup
 var mutex sync.Mutex
 
-func parseJsonFile(path string) {
+func getNumberOfComponentsFromFile(path string) int {
 	jsonFile, error := os.Open(path)
 	defer jsonFile.Close()
 
@@ -60,9 +63,11 @@ func parseJsonFile(path string) {
 	}
 
 	fmt.Println("Number of components in ", path, " file: ", len(quest.Components))
+
+	return len(quest.Components)
 }
 
-func walkDirectory(waitGroupWrapper *WaitGroupWrapper,
+func walkDirectory(writer *bufio.Writer, waitGroupWrapper *WaitGroupWrapper,
 	maximumNumberOfProcessingJob int, filesPath string) {
 	defer waitGroupWrapper.Done()
 
@@ -72,9 +77,9 @@ func walkDirectory(waitGroupWrapper *WaitGroupWrapper,
 
 			mutex.Lock()
 			if int64(waitGroupWrapper.Count()) < int64(maximumNumberOfProcessingJob) {
-				go walkDirectory(waitGroupWrapper, maximumNumberOfProcessingJob, path)
+				go walkDirectory(writer, waitGroupWrapper, maximumNumberOfProcessingJob, path)
 			} else {
-				walkDirectory(waitGroupWrapper, maximumNumberOfProcessingJob, path)
+				walkDirectory(writer, waitGroupWrapper, maximumNumberOfProcessingJob, path)
 			}
 			mutex.Unlock()
 
@@ -83,7 +88,9 @@ func walkDirectory(waitGroupWrapper *WaitGroupWrapper,
 
 		if fileInfo.Mode().IsRegular() {
 			if filepath.Ext(path) == ".json" {
-				parseJsonFile(path)
+				numberOfComponents := getNumberOfComponentsFromFile(path)
+				extensions.WriteString(writer,
+					"Number of components in "+path+" file: "+strconv.Itoa(numberOfComponents)+"\n")
 			}
 		}
 
