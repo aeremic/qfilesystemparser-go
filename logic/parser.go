@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -11,6 +12,11 @@ var MaximumNumberOfProcessingJobs int
 var CheckInterval int
 var MaximumExecutedCount int
 
+type MethodCallResult struct {
+	IsSuccess    bool
+	ErrorMessage error
+}
+
 type InputDataArgs struct {
 	FilesPath                     string
 	MaximumNumberOfProcessingJobs int
@@ -20,31 +26,51 @@ type InputDataArgs struct {
 
 type ParsingArgs struct{}
 
-func (t *Parser) SetInputDataViaRpc(args *InputDataArgs, reply *int) error {
+func (t *Parser) SetInputData(args *InputDataArgs, reply *MethodCallResult) error {
 	FilesPath = args.FilesPath
 	MaximumNumberOfProcessingJobs = args.MaximumNumberOfProcessingJobs
 	CheckInterval = args.CheckInterval
 	MaximumExecutedCount = args.MaximumExecutedCount
 
-	*reply = args.MaximumNumberOfProcessingJobs + args.MaximumExecutedCount
+	*reply = MethodCallResult{true, nil}
 
 	return nil
 }
 
-func (t *Parser) DoParsingViaRpc(args *ParsingArgs, reply *int) error {
-	executedCounter := 0
-	for executedCounter < MaximumExecutedCount {
-		waitGroupWrapper := WaitGroupWrapper{&waitGroup, int64(0)}
-		waitGroupWrapper.Add(1)
-		walkDirectory(&waitGroupWrapper, MaximumNumberOfProcessingJobs, FilesPath)
-		waitGroupWrapper.Wait()
+var quitChannel = make(chan bool)
 
-		time.Sleep(time.Duration(CheckInterval) * time.Second)
+func (t *Parser) DoParsing(args *ParsingArgs, reply *MethodCallResult) error {
+	go func() {
+		executedCounter := 0
+		for executedCounter < MaximumExecutedCount {
+			select {
+			case <-quitChannel:
+				fmt.Println("Parsing stopped.")
+				return
+			default:
+				waitGroupWrapper := WaitGroupWrapper{&waitGroup, int64(0)}
+				waitGroupWrapper.Add(1)
+				walkDirectory(&waitGroupWrapper, MaximumNumberOfProcessingJobs, FilesPath)
+				waitGroupWrapper.Wait()
 
-		executedCounter++
-	}
+				time.Sleep(time.Duration(CheckInterval) * time.Second)
 
-	*reply = 1
+				executedCounter++
+			}
+		}
+	}()
+
+	*reply = MethodCallResult{true, nil}
+
+	return nil
+}
+
+type StopParsingArgs struct{}
+
+func (t *Parser) StopParsing(arg StopParsingArgs, reply *MethodCallResult) error {
+	quitChannel <- true
+
+	*reply = MethodCallResult{true, nil}
 
 	return nil
 }
