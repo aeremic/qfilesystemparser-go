@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 )
 
 // App struct
@@ -28,4 +29,12 @@ func (a *App) Greet(name string) string {
 
 func (a *App) ShowHelloWorld(name string) string {
 	return fmt.Sprintf("Hello world to %s", name)
+}
+
+func (a *App) StartParsing(filePath string,
+	checkInterval int,
+	maximumNumberOfProcessingJobs int,
+	maximumExecutionCount int,
+) string {
+	return filePath + strconv.Itoa(checkInterval)
 }

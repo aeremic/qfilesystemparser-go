@@ -1,31 +1,63 @@
 import { useState } from "react";
-import logo from "./assets/images/logo-universal.png";
 import "./App.css";
-import { ShowHelloWorld } from "../wailsjs/go/main/App";
+import { StartParsing } from "../wailsjs/go/main/App";
 
 function App() {
-  const [resultText, setResultText] = useState(
-    "Please enter your name below 👇",
-  );
-  const [name, setName] = useState("");
-  const updateName = (e: any) => setName(e.target.value);
+  const [filePath, setFilePath] = useState<string>("");
+  const [checkInterval, setCheckInterval] = useState<number>(1000);
+  const [maximumNumberOfProcessingJobs, setMaximumNumberOfProcessingJobs] =
+    useState<number>(1);
+  const [maximumExecutionCount, setMaximumExecutionCount] = useState<number>(3);
+
+  const updateFilePath = (e: any) => setFilePath(e.target.value);
+  const updateCheckInterval = (e: any) => setCheckInterval(e.target.value);
+  const updateMaximumNumberOfProcessingJobs = (e: any) =>
+    setMaximumNumberOfProcessingJobs(e.target.value);
+  const updateMaximumExecutionCount = (e: any) =>
+    setMaximumExecutionCount(e.target.value);
+
+  const [resultText, setResultText] = useState("");
   const updateResultText = (result: string) => setResultText(result);
 
-  // function greet() {
-  //   Greet(name).then(updateResultText);
-  // }
-
-  function showHelloWorld() {
-    ShowHelloWorld(name).then(updateResultText);
-  }
+  const startParsing = () => {
+    StartParsing(
+      filePath,
+      checkInterval,
+      maximumNumberOfProcessingJobs,
+      maximumExecutionCount,
+    ).then(updateResultText);
+  };
 
   return (
-    <div id="App">
-      <img src={logo} id="logo" alt="logo" />
+    <div id="App" className="input-box">
+      Enter directory path:
+      <input type="text" value={filePath} onChange={updateFilePath} /> <br />
+      Enter check interval:
+      <input
+        type="number"
+        value={checkInterval}
+        onChange={updateCheckInterval}
+      />
+      <br />
+      Enter maximum number of processing jobs:
+      <input
+        type="number"
+        value={maximumNumberOfProcessingJobs}
+        onChange={updateMaximumNumberOfProcessingJobs}
+      />
+      <br />
+      Enter maximum execution count:
+      <input
+        type="number"
+        value={maximumExecutionCount}
+        onChange={updateMaximumExecutionCount}
+      />
+      <br />
+      <button onClick={startParsing}>Start parsing</button>
       <div id="result" className="result">
         {resultText}
       </div>
-      <div id="input" className="input-box">
+      {/* <div id="input" className="input-box">
         <input
           id="name"
           className="input"
@@ -40,9 +72,9 @@ function App() {
             showHelloWorld();
           }}
         >
-          Show hello world
+          Go
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }

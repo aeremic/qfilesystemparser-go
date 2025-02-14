@@ -9,3 +9,7 @@ export function Greet(arg1) {
 export function ShowHelloWorld(arg1) {
   return window['go']['main']['App']['ShowHelloWorld'](arg1);
 }
+
+export function StartParsing(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['StartParsing'](arg1, arg2, arg3, arg4);
+}

@@ -4,3 +4,5 @@
 export function Greet(arg1:string):Promise<string>;
 
 export function ShowHelloWorld(arg1:string):Promise<string>;
+
+export function StartParsing(arg1:string,arg2:number,arg3:number,arg4:number):Promise<string>;
