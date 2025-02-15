@@ -1,4 +1,4 @@
-module app
+module aeremic/qfilesystemparser
 
 go 1.22.0
 

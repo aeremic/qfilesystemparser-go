@@ -1,14 +1,18 @@
 package main
 
 import (
+	"aeremic/qfilesystemparser/logic"
 	"context"
 	"fmt"
-	"strconv"
+	"log"
+	"net/rpc"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx    context.Context
+	client *rpc.Client
+	error  error
 }
 
 // NewApp creates a new App application struct
@@ -20,6 +24,14 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+
+	client, error := rpc.DialHTTP("tcp", "127.0.0.1"+":1234")
+	if error != nil {
+		log.Fatal("Error on dialing: ", error)
+	}
+
+	a.client = client
+	a.error = error
 }
 
 // Greet returns a greeting for the given name
@@ -31,10 +43,38 @@ func (a *App) ShowHelloWorld(name string) string {
 	return fmt.Sprintf("Hello world to %s", name)
 }
 
-func (a *App) StartParsing(filePath string,
+func (a *App) StartParsing(filesPath string,
 	checkInterval int,
 	maximumNumberOfProcessingJobs int,
 	maximumExecutionCount int,
 ) string {
-	return filePath + strconv.Itoa(checkInterval)
+	if filesPath == "" ||
+		checkInterval == 0 ||
+		maximumNumberOfProcessingJobs == 0 ||
+		maximumExecutionCount == 0 {
+		return "Invalid input."
+	}
+
+	inputDataArgs := &logic.InputDataArgs{
+		FilesPath:                     filesPath,
+		CheckInterval:                 checkInterval,
+		MaximumNumberOfProcessingJobs: maximumNumberOfProcessingJobs,
+		MaximumExecutedCount:          maximumExecutionCount}
+
+	setInputDataReply := &logic.MethodCallResult{}
+	if a.client.Call("Parser.SetInputData", inputDataArgs, &setInputDataReply); a.error != nil {
+		log.Fatal("Error on client call: ", a.error)
+	}
+
+	doParsingReply := &logic.MethodCallResult{}
+	parsingArgs := &logic.ParsingArgs{}
+	if a.client.Call("Parser.DoParsing", parsingArgs, &doParsingReply); a.error != nil {
+		log.Fatal("Error on client call: ", a.error)
+	}
+
+	if doParsingReply.IsSuccess {
+		return "Parsing successfull."
+	} else {
+		return "Parsing failed."
+	}
 }
